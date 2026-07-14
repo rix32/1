@@ -1,6 +1,6 @@
 --[[
     ================================================================
-    ==                    ✈️ F-16 MULTI-TOOL v1.0                 ==
+    ==                    ✈️ F-16 MULTI-TOOL v1.2                 ==
     ==          FUTURE-THEMED PROFESSIONAL ROBLOX INTERFACE      ==
     ================================================================
 --]]
@@ -49,25 +49,38 @@ local effectsEnabled = true
 local currentFlightConnection = nil
 local originalAnims = {}
 
--- Store original animations to restore them later
-local function backupAnimations()
-    if Character:FindFirstChild("Animate") then
-        for _, val in ipairs(Character.Animate:GetChildren()) do
-            if val:IsA("StringValue") then
-                local anim = val:FindFirstChildOfClass("Animation")
-                if anim then
-                    originalAnims[val.Name] = anim.AnimationId
+-- Safe Animation Backup
+task.spawn(function()
+    pcall(function()
+        if Character:FindFirstChild("Animate") then
+            for _, val in ipairs(Character.Animate:GetChildren()) do
+                if val:IsA("StringValue") then
+                    local anim = val:FindFirstChildOfClass("Animation")
+                    if anim then
+                        originalAnims[val.Name] = anim.AnimationId
+                    end
                 end
             end
         end
-    end
-end
-backupAnimations()
+    end)
+end)
+
 LocalPlayer.CharacterAdded:Connect(function(char)
     Character = char
     Humanoid = char:WaitForChild("Humanoid")
     task.wait(1)
-    backupAnimations()
+    pcall(function()
+        if char:FindFirstChild("Animate") then
+            for _, val in ipairs(char.Animate:GetChildren()) do
+                if val:IsA("StringValue") then
+                    local anim = val:FindFirstChildOfClass("Animation")
+                    if anim then
+                        originalAnims[val.Name] = anim.AnimationId
+                    end
+                end
+            end
+        end
+    end)
 end)
 
 -- Tween Helper
@@ -117,10 +130,10 @@ local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0, 200, 1, 0)
 Title.Position = UDim2.new(0, 20, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.Orbitron
+Title.Font = Enum.Font.GothamBold
 Title.Text = "✈️ F-16 CONTROL"
 Title.TextColor3 = THEME.AccentGlow
-Title.TextSize = 20
+Title.TextSize = 18
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
@@ -129,10 +142,10 @@ local Subtitle = Instance.new("TextLabel")
 Subtitle.Size = UDim2.new(0, 250, 1, 0)
 Subtitle.Position = UDim2.new(0, 190, 0, 0)
 Subtitle.BackgroundTransparency = 1
-Subtitle.Font = Enum.Font.SourceSansItalic
+Subtitle.Font = Enum.Font.SourceSans
 Subtitle.Text = "[ المستقبل بين يديك | Future in Your Hands ]"
 Subtitle.TextColor3 = THEME.TextMuted
-Subtitle.TextSize = 12
+Subtitle.TextSize = 11
 Subtitle.TextXAlignment = Enum.TextXAlignment.Left
 Subtitle.Parent = TopBar
 
@@ -289,7 +302,7 @@ local function addNavButton(name, labelAr, labelEn)
     text.Font = Enum.Font.GothamSemibold
     text.Text = labelEn .. "\n" .. labelAr
     text.TextColor3 = THEME.TextMuted
-    text.TextSize = 11
+    text.TextSize = 10
     text.Parent = btn
     
     btn.MouseEnter:Connect(function()
@@ -356,7 +369,7 @@ local function createSectionTitle(parent, ar, en)
     lbl.Font = Enum.Font.GothamBold
     lbl.Text = en .. " | " .. ar
     lbl.TextColor3 = THEME.AccentBlue
-    lbl.TextSize = 14
+    lbl.TextSize = 13
     lbl.TextXAlignment = Enum.TextXAlignment.Left
     lbl.Parent = frame
 end
@@ -370,7 +383,7 @@ FlightToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 FlightToggle.Font = Enum.Font.GothamBold
 FlightToggle.Text = "OFF | إيقاف الطيران"
 FlightToggle.TextColor3 = Color3.fromRGB(255, 75, 75)
-FlightToggle.TextSize = 14
+FlightToggle.TextSize = 13
 FlightToggle.Parent = pageFlight
 
 local FTCorner = Instance.new("UICorner")
@@ -470,7 +483,7 @@ SpeedLabel.BackgroundTransparency = 1
 SpeedLabel.Font = Enum.Font.GothamBold
 SpeedLabel.Text = "SPEED | السرعة: 50"
 SpeedLabel.TextColor3 = THEME.TextWhite
-SpeedLabel.TextSize = 14
+SpeedLabel.TextSize = 13
 SpeedLabel.Parent = SpeedPanel
 
 local function updateFlightSpeed(val)
@@ -501,7 +514,7 @@ WalkLabel.BackgroundTransparency = 1
 WalkLabel.Font = Enum.Font.GothamBold
 WalkLabel.Text = "WALKSPEED | السرعة الحالية: 16"
 WalkLabel.TextColor3 = THEME.TextWhite
-WalkLabel.TextSize = 14
+WalkLabel.TextSize = 13
 WalkLabel.Parent = WalkSpeedPanel
 
 local WMinusBtn = Instance.new("TextButton")
@@ -527,7 +540,9 @@ WPlusBtn.Parent = WalkSpeedPanel
 local function updateWalkSpeed(val)
     walkSpeedValue = math.clamp(val, 16, 1000)
     WalkLabel.Text = "WALKSPEED | السرعة الحالية: " .. tostring(walkSpeedValue)
-    Humanoid.WalkSpeed = walkSpeedValue
+    pcall(function()
+        Humanoid.WalkSpeed = walkSpeedValue
+    end)
 end
 
 WMinusBtn.MouseButton1Click:Connect(function() updateWalkSpeed(walkSpeedValue - 10) end)
@@ -545,7 +560,7 @@ SearchBarAnim.PlaceholderText = "Search Animation... | ابحث عن مشية...
 SearchBarAnim.Font = Enum.Font.Gotham
 SearchBarAnim.Text = ""
 SearchBarAnim.TextColor3 = THEME.TextWhite
-SearchBarAnim.TextSize = 13
+SearchBarAnim.TextSize = 12
 SearchBarAnim.Parent = pageAnims
 
 local AnimGrid = Instance.new("Frame")
@@ -566,7 +581,7 @@ GridLay.CellSize = UDim2.new(0, 210, 0, 40)
 GridLay.Padding = UDim2.new(0, 10, 0, 10)
 GridLay.Parent = AnimScroll
 
--- Mock Animation Database (50 Different Roblox Animations)
+-- Animation Database
 local walkAnims = {
     {id = "01", nameEn = "Zombie Walk", nameAr = "مشية الزومبي", animId = "rbxassetid://616150244"},
     {id = "02", nameEn = "Ninja Walk", nameAr = "مشية النينجا", animId = "rbxassetid://616111009"},
@@ -579,34 +594,34 @@ local walkAnims = {
     {id = "09", nameEn = "Sneaky Walk", nameAr = "مشية متسللة", animId = "rbxassetid://1132274478"},
     {id = "10", nameEn = "Elegant Walk", nameAr = "مشية راقية", animId = "rbxassetid://910001000"},
 }
--- Dynamically filling remaining animations up to 50
 for i = 11, 50 do
     table.insert(walkAnims, {
         id = tostring(i),
         nameEn = "Animation Style " .. tostring(i),
         nameAr = "نمط مشية رقم " .. tostring(i),
-        animId = "rbxassetid://616111009" -- Fallback to Ninja
+        animId = "rbxassetid://616111009"
     })
 end
 
 local animButtons = {}
 
 local function applyWalkAnimation(animId)
-    local animate = Character:FindFirstChild("Animate")
-    if animate then
-        local walk = animate:FindFirstChild("walk")
-        local run = animate:FindFirstChild("run")
-        if walk and walk:FindFirstChildOfClass("Animation") then
-            walk:FindFirstChildOfClass("Animation").AnimationId = animId
+    pcall(function()
+        local animate = Character:FindFirstChild("Animate")
+        if animate then
+            local walk = animate:FindFirstChild("walk")
+            local run = animate:FindFirstChild("run")
+            if walk and walk:FindFirstChildOfClass("Animation") then
+                walk:FindFirstChildOfClass("Animation").AnimationId = animId
+            end
+            if run and run:FindFirstChildOfClass("Animation") then
+                run:FindFirstChildOfClass("Animation").AnimationId = animId
+            end
+            Humanoid.WalkSpeed = Humanoid.WalkSpeed + 0.1
+            task.wait(0.1)
+            Humanoid.WalkSpeed = walkSpeedValue
         end
-        if run and run:FindFirstChildOfClass("Animation") then
-            run:FindFirstChildOfClass("Animation").AnimationId = animId
-        end
-        -- Toggle movement to force update animation
-        Humanoid.WalkSpeed = Humanoid.WalkSpeed + 0.1
-        task.wait(0.1)
-        Humanoid.WalkSpeed = walkSpeedValue
-    end
+    end)
 end
 
 for _, data in ipairs(walkAnims) do
@@ -629,7 +644,6 @@ for _, data in ipairs(walkAnims) do
     table.insert(animButtons, {button = abtn, info = data})
 end
 
--- Search filter for Animations
 SearchBarAnim.Changed:Connect(function()
     local q = SearchBarAnim.Text:lower()
     for _, item in ipairs(animButtons) do
@@ -641,26 +655,27 @@ SearchBarAnim.Changed:Connect(function()
     end
 end)
 
--- Restore Default Anim Button
 local ResetAnimBtn = Instance.new("TextButton")
 ResetAnimBtn.Size = UDim2.new(0, 460, 0, 45)
 ResetAnimBtn.BackgroundColor3 = Color3.fromRGB(35, 15, 15)
 ResetAnimBtn.Text = "RESTORE DEFAULT WALK | استعادة المشية الافتراضية"
 ResetAnimBtn.Font = Enum.Font.GothamBold
 ResetAnimBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-ResetAnimBtn.TextSize = 12
+ResetAnimBtn.TextSize = 11
 ResetAnimBtn.Parent = pageAnims
 
 ResetAnimBtn.MouseButton1Click:Connect(function()
-    local animate = Character:FindFirstChild("Animate")
-    if animate then
-        for name, animId in pairs(originalAnims) do
-            local val = animate:FindFirstChild(name)
-            if val and val:FindFirstChildOfClass("Animation") then
-                val:FindFirstChildOfClass("Animation").AnimationId = animId
+    pcall(function()
+        local animate = Character:FindFirstChild("Animate")
+        if animate then
+            for name, animId in pairs(originalAnims) do
+                local val = animate:FindFirstChild(name)
+                if val and val:FindFirstChildOfClass("Animation") then
+                    val:FindFirstChildOfClass("Animation").AnimationId = animId
+                end
             end
         end
-    end
+    end)
 end)
 
 ----------------------------------------------------
@@ -675,7 +690,7 @@ SearchBarEmote.PlaceholderText = "Search Emote... | ابحث عن رقصة..."
 SearchBarEmote.Font = Enum.Font.Gotham
 SearchBarEmote.Text = ""
 SearchBarEmote.TextColor3 = THEME.TextWhite
-SearchBarEmote.TextSize = 13
+SearchBarEmote.TextSize = 12
 SearchBarEmote.Parent = pageEmotes
 
 local EmoteGrid = Instance.new("Frame")
@@ -696,7 +711,6 @@ EGridLay.CellSize = UDim2.new(0, 210, 0, 40)
 EGridLay.Padding = UDim2.new(0, 10, 0, 10)
 EGridLay.Parent = EmoteScroll
 
--- Mock Emotes Database
 local emotesData = {
     {id = "01", nameEn = "Classic Wave", nameAr = "تلويح كلاسيكي", animId = "rbxassetid://128777973"},
     {id = "02", nameEn = "Point Gesture", nameAr = "حركة الإشارة", animId = "rbxassetid://128853357"},
@@ -709,7 +723,7 @@ for i = 6, 50 do
         id = string.format("%02d", i),
         nameEn = "Future Emote " .. tostring(i),
         nameAr = "رقصة المستقبل رقم " .. tostring(i),
-        animId = "rbxassetid://182435877" -- Fallback to Dance 1
+        animId = "rbxassetid://182435877"
     })
 end
 
@@ -717,11 +731,13 @@ local emoteButtons = {}
 local activeTrack = nil
 
 local function playEmote(animId)
-    if activeTrack then activeTrack:Stop() end
-    local anim = Instance.new("Animation")
-    anim.AnimationId = animId
-    activeTrack = Humanoid:LoadAnimation(anim)
-    activeTrack:Play()
+    pcall(function()
+        if activeTrack then activeTrack:Stop() end
+        local anim = Instance.new("Animation")
+        anim.AnimationId = animId
+        activeTrack = Humanoid:LoadAnimation(anim)
+        activeTrack:Play()
+    end)
 end
 
 for _, data in ipairs(emotesData) do
@@ -744,7 +760,6 @@ for _, data in ipairs(emotesData) do
     table.insert(emoteButtons, {button = ebtn, info = data})
 end
 
--- Search filter for Emotes
 SearchBarEmote.Changed:Connect(function()
     local q = SearchBarEmote.Text:lower()
     for _, item in ipairs(emoteButtons) do
@@ -756,18 +771,17 @@ SearchBarEmote.Changed:Connect(function()
     end
 end)
 
--- Stop Emote Button
 local StopEmoteBtn = Instance.new("TextButton")
 StopEmoteBtn.Size = UDim2.new(0, 460, 0, 45)
 StopEmoteBtn.BackgroundColor3 = Color3.fromRGB(35, 15, 15)
 StopEmoteBtn.Text = "STOP EMOTE | إيقاف الرقصة"
 StopEmoteBtn.Font = Enum.Font.GothamBold
 StopEmoteBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-StopEmoteBtn.TextSize = 12
+StopEmoteBtn.TextSize = 11
 StopEmoteBtn.Parent = pageEmotes
 
 StopEmoteBtn.MouseButton1Click:Connect(function()
-    if activeTrack then activeTrack:Stop() end
+    if activeTrack then pcall(function() activeTrack:Stop() end) end
 end)
 
 ----------------------------------------------------
@@ -781,7 +795,7 @@ ToggleNameBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
 ToggleNameBtn.Font = Enum.Font.GothamBold
 ToggleNameBtn.Text = "SHOW NAME | إظهار الاسم"
 ToggleNameBtn.TextColor3 = THEME.AccentBlue
-ToggleNameBtn.TextSize = 14
+ToggleNameBtn.TextSize = 13
 ToggleNameBtn.Parent = pagePlayer
 
 local TNCorn = Instance.new("UICorner")
@@ -795,20 +809,21 @@ ToggleNameBtn.MouseButton1Click:Connect(function()
         if hideNameActive then
             ToggleNameBtn.Text = "HIDE NAME | إخفاء الاسم"
             ToggleNameBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
-            if head:FindFirstChild("Nametag") or Character:FindFirstChild("HumanoidLayout") then
-                -- Support customized custom nametags in games
+            pcall(function()
                 for _, child in ipairs(head:GetChildren()) do
                     if child:IsA("BillboardGui") then child.Enabled = false end
                 end
-            end
-            Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            end)
         else
             ToggleNameBtn.Text = "SHOW NAME | إظهار الاسم"
             ToggleNameBtn.TextColor3 = THEME.AccentBlue
-            for _, child in ipairs(head:GetChildren()) do
-                if child:IsA("BillboardGui") then child.Enabled = true end
-            end
-            Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+            pcall(function()
+                for _, child in ipairs(head:GetChildren()) do
+                    if child:IsA("BillboardGui") then child.Enabled = true end
+                end
+                Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+            end)
         end
     end
 end)
@@ -818,14 +833,13 @@ end)
 ----------------------------------------------------
 createSectionTitle(pageSettings, "إعدادات الواجهة والسكربت", "SYSTEM SETTINGS")
 
--- Reset Settings Button
 local ResetBtn = Instance.new("TextButton")
 ResetBtn.Size = UDim2.new(0, 460, 0, 45)
 ResetBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 ResetBtn.Text = "RESET ALL SETTINGS | إعادة ضبط الإعدادات"
 ResetBtn.Font = Enum.Font.GothamBold
 ResetBtn.TextColor3 = THEME.TextWhite
-ResetBtn.TextSize = 12
+ResetBtn.TextSize = 11
 ResetBtn.Parent = pageSettings
 
 local Rbc = Instance.new("UICorner")
@@ -839,14 +853,13 @@ ResetBtn.MouseButton1Click:Connect(function()
     if hideNameActive then ToggleNameBtn.MouseButton1Click:Fire() end
 end)
 
--- Effects Toggle (Animations & Tweens)
 local EffectsToggle = Instance.new("TextButton")
 EffectsToggle.Size = UDim2.new(0, 460, 0, 45)
 EffectsToggle.BackgroundColor3 = Color3.fromRGB(30, 40, 30)
 EffectsToggle.Text = "UI EFFECTS: ENABLED | المؤثرات: تفعيل"
 EffectsToggle.Font = Enum.Font.GothamBold
 EffectsToggle.TextColor3 = THEME.AccentGlow
-EffectsToggle.TextSize = 12
+EffectsToggle.TextSize = 11
 EffectsToggle.Parent = pageSettings
 
 local Efc = Instance.new("UICorner")
@@ -866,25 +879,13 @@ EffectsToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Scale Toggle (Change UI Size)
 local ScaleToggle = Instance.new("TextButton")
 ScaleToggle.Size = UDim2.new(0, 460, 0, 45)
 ScaleToggle.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 ScaleToggle.Text = "CHANGE SCALE (RESPONSIVE) | تغيير حجم الواجهة"
 ScaleToggle.Font = Enum.Font.GothamBold
 ScaleToggle.TextColor3 = THEME.TextWhite
-ScaleToggle.TextSize = 12
+ScaleToggle.TextSize = 11
 ScaleToggle.Parent = pageSettings
 
 local Sclc = Instance.new("UICorner")
-Sclc.CornerRadius = UDim.new(0, 8)
-Sclc.Parent = ScaleToggle
-
-local uiScales = {UDim2.new(0, 680, 0, 420), UDim2.new(0, 580, 0, 360), UDim2.new(0, 750, 0, 460)}
-local currentScaleIndex = 1
-
-ScaleToggle.MouseButton1Click:Connect(function()
-    currentScaleIndex = currentScaleIndex + 1
-    if currentScaleIndex > #uiScales then currentScaleIndex = 1 end
-    tTween(MainFrame, TweenInfo.new(0.3), {Size = uiScales[currentScaleIndex]})
-end)
