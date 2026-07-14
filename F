@@ -31,6 +31,7 @@ local THEME = {
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "F16_Dashboard"
 ScreenGui.ResetOnSpawn = false
+
 -- Attempt to parent to CoreGui for executor support, fallback to PlayerGui
 local success, err = pcall(function()
     ScreenGui.Parent = CoreGui
@@ -262,6 +263,7 @@ local function createPage(name)
     
     local pad = Instance.new("UIPadding")
     pad.PaddingTop = UDim.new(0, 15)
+    page.ScrollBarImageTransparency = 0.2
     pad.Parent = page
 
     pages[name] = page
