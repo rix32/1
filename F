@@ -1,6 +1,6 @@
 --[[
     ================================================================
-    ==                    ✈️ F-16 MULTI-TOOL v1.2                 ==
+    ==                    ✈️ F-16 MULTI-TOOL v1.3                 ==
     ==          FUTURE-THEMED PROFESSIONAL ROBLOX INTERFACE      ==
     ================================================================
 --]]
@@ -13,8 +13,17 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
+
+-- Safe Character Loader (لضمان عدم تعليق السكربت)
+local Character = LocalPlayer.Character
+local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+
+task.spawn(function()
+    if not Character then
+        Character = LocalPlayer.CharacterAdded:Wait()
+    end
+    Humanoid = Character:WaitForChild("Humanoid")
+end)
 
 -- Constants & Theme (Black, Blue, White, Glow)
 local THEME = {
@@ -32,7 +41,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "F16_Dashboard"
 ScreenGui.ResetOnSpawn = false
 
--- Attempt to parent to CoreGui for executor support, fallback to PlayerGui
+-- Safe Parent to CoreGui
 local success, err = pcall(function()
     ScreenGui.Parent = CoreGui
 end)
@@ -52,7 +61,7 @@ local originalAnims = {}
 -- Safe Animation Backup
 task.spawn(function()
     pcall(function()
-        if Character:FindFirstChild("Animate") then
+        if Character and Character:FindFirstChild("Animate") then
             for _, val in ipairs(Character.Animate:GetChildren()) do
                 if val:IsA("StringValue") then
                     local anim = val:FindFirstChildOfClass("Animation")
@@ -94,7 +103,7 @@ local function tTween(obj, info, property)
     return tween
 end
 
--- Main Frame (Modern Future UI)
+-- Main Frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 680, 0, 420)
@@ -113,7 +122,7 @@ UIStroke.Color = THEME.AccentBlue
 UIStroke.Thickness = 1.5
 UIStroke.Parent = MainFrame
 
--- Top Bar (Header)
+-- Top Bar
 local TopBar = Instance.new("Frame")
 TopBar.Name = "TopBar"
 TopBar.Size = UDim2.new(1, 0, 0, 50)
@@ -137,7 +146,7 @@ Title.TextSize = 18
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
--- Subtitle (AR/EN)
+-- Subtitle
 local Subtitle = Instance.new("TextLabel")
 Subtitle.Size = UDim2.new(0, 250, 1, 0)
 Subtitle.Position = UDim2.new(0, 190, 0, 0)
@@ -149,7 +158,7 @@ Subtitle.TextSize = 11
 Subtitle.TextXAlignment = Enum.TextXAlignment.Left
 Subtitle.Parent = TopBar
 
--- Close Button (X)
+-- Close Button
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Name = "CloseBtn"
 CloseBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -171,7 +180,7 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- Minimize Button (-)
+-- Minimize Button
 local MiniBtn = Instance.new("TextButton")
 MiniBtn.Name = "MiniBtn"
 MiniBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -200,7 +209,7 @@ MiniBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Draggable Logic (Multi-device friendly)
+-- Dragging Logic
 local dragToggle, dragStart, startPos
 local function updateInput(input)
     local delta = input.Position - dragStart
@@ -227,7 +236,7 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
--- Sidebar (Navigation)
+-- Sidebar
 local Sidebar = Instance.new("Frame")
 Sidebar.Name = "Sidebar"
 Sidebar.Size = UDim2.new(0, 160, 1, -50)
@@ -323,7 +332,6 @@ local function addNavButton(name, labelAr, labelEn)
         pages[name].Visible = true
         activePage = name
         
-        -- Reset other nav buttons
         for _, otherBtn in ipairs(Sidebar:GetChildren()) do
             if otherBtn:IsA("TextButton") then
                 otherBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
@@ -350,13 +358,9 @@ addNavButton("Emotes", "💃 الرقصات", "EMOTES")
 addNavButton("Player", "👤 اللاعب", "PLAYER")
 addNavButton("Settings", "⚙️ الإعدادات", "SETTINGS")
 
--- Default Page Open
 pages["Flight"].Visible = true
 activePage = "Flight"
 
-----------------------------------------------------
--- ✈️ FLIGHT PAGE DEVELOPMENT
-----------------------------------------------------
 local function createSectionTitle(parent, ar, en)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(0, 460, 0, 35)
@@ -374,9 +378,11 @@ local function createSectionTitle(parent, ar, en)
     lbl.Parent = frame
 end
 
+----------------------------------------------------
+-- ✈️ FLIGHT CONTROLS
+----------------------------------------------------
 createSectionTitle(pageFlight, "التحكم في الطيران", "FLIGHT CONTROLS")
 
--- Toggle Button (Flight)
 local FlightToggle = Instance.new("TextButton")
 FlightToggle.Size = UDim2.new(0, 460, 0, 50)
 FlightToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
@@ -390,15 +396,14 @@ local FTCorner = Instance.new("UICorner")
 FTCorner.CornerRadius = UDim.new(0, 8)
 FTCorner.Parent = FlightToggle
 
--- Flight Engine Support
 local function toggleFlight()
+    if not Character or not Character:FindFirstChild("PrimaryPart") then return end
     flightActive = not flightActive
     if flightActive then
         FlightToggle.Text = "ON | تشغيل الطيران"
         FlightToggle.TextColor3 = THEME.AccentGlow
         FlightToggle.BackgroundColor3 = Color3.fromRGB(0, 50, 30)
         
-        -- Roblox Flight Logic (BodyVelocity & BodyGyro)
         local bg = Instance.new("BodyGyro")
         bg.P = 9e4
         bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
@@ -446,7 +451,7 @@ end
 
 FlightToggle.MouseButton1Click:Connect(toggleFlight)
 
--- Speed Controls (+ / -)
+-- Speed
 local SpeedPanel = Instance.new("Frame")
 SpeedPanel.Size = UDim2.new(0, 460, 0, 70)
 SpeedPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
@@ -495,7 +500,7 @@ MinusBtn.MouseButton1Click:Connect(function() updateFlightSpeed(flightSpeed - 5)
 PlusBtn.MouseButton1Click:Connect(function() updateFlightSpeed(flightSpeed + 5) end)
 
 ----------------------------------------------------
--- 🚶 WALK SPEED PAGE DEVELOPMENT
+-- 🚶 WALK SPEED CONTROLS
 ----------------------------------------------------
 createSectionTitle(pageWalk, "تعديل سرعة المشي", "WALK SPEED CONTROLS")
 
@@ -541,7 +546,9 @@ local function updateWalkSpeed(val)
     walkSpeedValue = math.clamp(val, 16, 1000)
     WalkLabel.Text = "WALKSPEED | السرعة الحالية: " .. tostring(walkSpeedValue)
     pcall(function()
-        Humanoid.WalkSpeed = walkSpeedValue
+        if Humanoid then
+            Humanoid.WalkSpeed = walkSpeedValue
+        end
     end)
 end
 
@@ -549,7 +556,7 @@ WMinusBtn.MouseButton1Click:Connect(function() updateWalkSpeed(walkSpeedValue - 
 WPlusBtn.MouseButton1Click:Connect(function() updateWalkSpeed(walkSpeedValue + 10) end)
 
 ----------------------------------------------------
--- 🚶 ANIMATIONS PAGE DEVELOPMENT (50 CUSTOM ANIMS)
+-- 🏃 WALK ANIMATIONS (50 CUSTOM ANIMS)
 ----------------------------------------------------
 createSectionTitle(pageAnims, "اختر حركة المشي", "WALK ANIMATIONS")
 
@@ -581,7 +588,7 @@ GridLay.CellSize = UDim2.new(0, 210, 0, 40)
 GridLay.Padding = UDim2.new(0, 10, 0, 10)
 GridLay.Parent = AnimScroll
 
--- Animation Database
+-- Animations Data
 local walkAnims = {
     {id = "01", nameEn = "Zombie Walk", nameAr = "مشية الزومبي", animId = "rbxassetid://616150244"},
     {id = "02", nameEn = "Ninja Walk", nameAr = "مشية النينجا", animId = "rbxassetid://616111009"},
@@ -607,7 +614,7 @@ local animButtons = {}
 
 local function applyWalkAnimation(animId)
     pcall(function()
-        local animate = Character:FindFirstChild("Animate")
+        local animate = Character and Character:FindFirstChild("Animate")
         if animate then
             local walk = animate:FindFirstChild("walk")
             local run = animate:FindFirstChild("run")
@@ -617,9 +624,11 @@ local function applyWalkAnimation(animId)
             if run and run:FindFirstChildOfClass("Animation") then
                 run:FindFirstChildOfClass("Animation").AnimationId = animId
             end
-            Humanoid.WalkSpeed = Humanoid.WalkSpeed + 0.1
-            task.wait(0.1)
-            Humanoid.WalkSpeed = walkSpeedValue
+            if Humanoid then
+                Humanoid.WalkSpeed = Humanoid.WalkSpeed + 0.1
+                task.wait(0.1)
+                Humanoid.WalkSpeed = walkSpeedValue
+            end
         end
     end)
 end
@@ -666,7 +675,7 @@ ResetAnimBtn.Parent = pageAnims
 
 ResetAnimBtn.MouseButton1Click:Connect(function()
     pcall(function()
-        local animate = Character:FindFirstChild("Animate")
+        local animate = Character and Character:FindFirstChild("Animate")
         if animate then
             for name, animId in pairs(originalAnims) do
                 local val = animate:FindFirstChild(name)
@@ -679,7 +688,7 @@ ResetAnimBtn.MouseButton1Click:Connect(function()
 end)
 
 ----------------------------------------------------
--- 💃 EMOTES PAGE DEVELOPMENT (50 CUSTOM EMOTES)
+-- 💃 EMOTES (50 CUSTOM EMOTES)
 ----------------------------------------------------
 createSectionTitle(pageEmotes, "قائمة الرقصات والرموز", "EMOTES LIST")
 
@@ -732,6 +741,7 @@ local activeTrack = nil
 
 local function playEmote(animId)
     pcall(function()
+        if not Humanoid then return end
         if activeTrack then activeTrack:Stop() end
         local anim = Instance.new("Animation")
         anim.AnimationId = animId
@@ -785,7 +795,7 @@ StopEmoteBtn.MouseButton1Click:Connect(function()
 end)
 
 ----------------------------------------------------
--- 👤 PLAYER PAGE DEVELOPMENT
+-- 👤 PLAYER NAME TAG
 ----------------------------------------------------
 createSectionTitle(pagePlayer, "إدارة اسم اللاعب", "PLAYER NAME TAG")
 
@@ -804,7 +814,7 @@ TNCorn.Parent = ToggleNameBtn
 
 ToggleNameBtn.MouseButton1Click:Connect(function()
     hideNameActive = not hideNameActive
-    local head = Character:FindFirstChild("Head")
+    local head = Character and Character:FindFirstChild("Head")
     if head then
         if hideNameActive then
             ToggleNameBtn.Text = "HIDE NAME | إخفاء الاسم"
@@ -813,7 +823,7 @@ ToggleNameBtn.MouseButton1Click:Connect(function()
                 for _, child in ipairs(head:GetChildren()) do
                     if child:IsA("BillboardGui") then child.Enabled = false end
                 end
-                Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+                if Humanoid then Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None end
             end)
         else
             ToggleNameBtn.Text = "SHOW NAME | إظهار الاسم"
@@ -822,14 +832,14 @@ ToggleNameBtn.MouseButton1Click:Connect(function()
                 for _, child in ipairs(head:GetChildren()) do
                     if child:IsA("BillboardGui") then child.Enabled = true end
                 end
-                Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer
+                if Humanoid then Humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.Viewer end
             end)
         end
     end
 end)
 
 ----------------------------------------------------
--- ⚙️ SETTINGS PAGE DEVELOPMENT
+-- ⚙️ SYSTEM SETTINGS
 ----------------------------------------------------
 createSectionTitle(pageSettings, "إعدادات الواجهة والسكربت", "SYSTEM SETTINGS")
 
@@ -889,3 +899,14 @@ ScaleToggle.TextSize = 11
 ScaleToggle.Parent = pageSettings
 
 local Sclc = Instance.new("UICorner")
+Sclc.CornerRadius = UDim.new(0, 8)
+Sclc.Parent = ScaleToggle
+
+local uiScales = {UDim2.new(0, 680, 0, 420), UDim2.new(0, 580, 0, 360), UDim2.new(0, 750, 0, 460)}
+local currentScaleIndex = 1
+
+ScaleToggle.MouseButton1Click:Connect(function()
+    currentScaleIndex = currentScaleIndex + 1
+    if currentScaleIndex > #uiScales then currentScaleIndex = 1 end
+    tTween(MainFrame, TweenInfo.new(0.3), {Size = uiScales[currentScaleIndex]})
+end)
