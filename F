@@ -1,1418 +1,234 @@
---[[
-    ╔══════════════════════════════════════════════════════════════╗
-    ║           ✈️ F-16 MULTI-TOOL v3.0 — SYNTHWAVE EDITION        ║
-    ║     واجهة مستقبلية | Safe Toggles | Full Feature Suite      ║
-    ║   ثيم سايثويف / سايبربانك — تبديل آمن بدون لاغ أو تجميد     ║
-    ╚══════════════════════════════════════════════════════════════╝
-]]
+--========================================================================--
+--              [ 4v25 DEVELOPMENT SYSTEM - V3.0 ]                        --
+--         PREMIUM AUTO-FARM INTERFACE | EXCLUSIVE EDITION                --
+--========================================================================--
 
--- ─── Services | الخدمات ───────────────────────────────────────────
-local Players          = game:GetService("Players")
-local TweenService     = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local RunService       = game:GetService("RunService")
-local CoreGui          = game:GetService("CoreGui")
+local CoreGuiService = game:GetService("CoreGui")
+local PlayersService = game:GetService("Players")
+local WorkspaceService = game:GetService("Workspace")
+local MarketService = game:GetService("MarketplaceService")
 
-local LocalPlayer = Players.LocalPlayer
-local Camera      = workspace.CurrentCamera
+-- إعداد حاوية الواجهة | Interface Container Setup
+local MainInterface = Instance.new("ScreenGui")
+MainInterface.Name = "CustomModule_4v25"
+MainInterface.Parent = PlayersService.LocalPlayer:WaitForChild("PlayerGui")
+MainInterface.ResetOnSpawn = false
 
--- ─── Synthwave Theme | ثيم الألوان المستقبلية ───────────────────
-local THEME = {
-    BgDeep       = Color3.fromRGB(15, 15, 22),
-    BgPanel      = Color3.fromRGB(18, 18, 28),
-    BgSidebar    = Color3.fromRGB(12, 12, 20),
-    BgCard       = Color3.fromRGB(22, 22, 34),
+-- الهيكل الرئيسي | Core Window Structure
+local ControlPanel = Instance.new("Frame")
+local HeaderBar = Instance.new("Frame")
+local PanelTitle = Instance.new("TextLabel")
+local ActionBtn = Instance.new("TextButton")
+local ExitBtn = Instance.new("TextButton")
+local MiniBtn = Instance.new("TextButton")
+local DisplayArea = Instance.new("Frame")
 
-    Cyan         = Color3.fromRGB(0, 220, 255),
-    CyanDim      = Color3.fromRGB(0, 162, 255),
-    Purple       = Color3.fromRGB(130, 50, 250),
-    PurpleDeep   = Color3.fromRGB(80, 30, 180),
-    Magenta      = Color3.fromRGB(255, 0, 180),
+-- زوايا دائرية للتصميم | Aesthetic Modern Corners
+local RoundCorner1 = Instance.new("UICorner")
+local RoundCorner2 = Instance.new("UICorner")
+RoundCorner1.CornerRadius = UDim.new(0, 10)
+RoundCorner2.CornerRadius = UDim.new(0, 6)
 
-    TextWhite    = Color3.fromRGB(245, 248, 255),
-    TextMuted    = Color3.fromRGB(140, 145, 170),
-    TextGlow     = Color3.fromRGB(0, 255, 255),
+-- تنسيق المظهر | UI Visual Style
+ControlPanel.Name = "ControlPanel"
+ControlPanel.Parent = MainInterface
+ControlPanel.BackgroundColor3 = Color3.fromRGB(20, 24, 32) -- لون داكن احترافي
+ControlPanel.Position = UDim2.new(0.4, 0, 0.35, 0)
+ControlPanel.Size = UDim2.new(0, 240, 0, 140)
+ControlPanel.Active = true
+ControlPanel.Draggable = true
+RoundCorner1.Parent = ControlPanel
 
-    OnGreen      = Color3.fromRGB(0, 200, 120),
-    OnGreenBg    = Color3.fromRGB(10, 45, 35),
-    OffRed       = Color3.fromRGB(255, 70, 90),
-    OffRedBg     = Color3.fromRGB(40, 15, 22),
+-- شريط التحكم العلوي | Top Navigation Bar
+HeaderBar.Name = "HeaderBar"
+HeaderBar.Parent = ControlPanel
+HeaderBar.BackgroundColor3 = Color3.fromRGB(32, 38, 52)
+HeaderBar.Size = UDim2.new(1, 0, 0, 32)
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 10)
+TopCorner.Parent = HeaderBar
 
-    Hover        = Color3.fromRGB(35, 30, 55),
-    Stroke       = Color3.fromRGB(0, 200, 255),
-}
+-- عنوان اللوحة | Window Title (Arabic & English)
+PanelTitle.Name = "PanelTitle"
+PanelTitle.Parent = HeaderBar
+PanelTitle.BackgroundTransparency = 1
+PanelTitle.Position = UDim2.new(0.06, 0, 0, 0)
+PanelTitle.Size = UDim2.new(0.5, 0, 1, 0)
+PanelTitle.Font = Enum.Font.GothamBold
+PanelTitle.Text = "4v25 | النقل الذكي"
+PanelTitle.TextColor3 = Color3.fromRGB(240, 240, 240)
+PanelTitle.TextSize = 13
+PanelTitle.TextXAlignment = Enum.TextXAlignment.Left
 
--- ─── State | حالة الميزات ───────────────────────────────────────
-local Character = LocalPlayer.Character
-local Humanoid  = Character and Character:FindFirstChildOfClass("Humanoid")
+-- زر الإغلاق | Exit Button (X)
+ExitBtn.Name = "ExitBtn"
+ExitBtn.Parent = HeaderBar
+ExitBtn.BackgroundTransparency = 1
+ExitBtn.Position = UDim2.new(0.85, 0, 0, 0)
+ExitBtn.Size = UDim2.new(0, 30, 1, 0)
+ExitBtn.Font = Enum.Font.GothamBold
+ExitBtn.Text = "X"
+ExitBtn.TextColor3 = Color3.fromRGB(255, 90, 90)
+ExitBtn.TextSize = 14
 
-local State = {
-    -- Flight | الطيران
-    flightOn       = false,
-    flightSpeed    = 50,
-    flightConn     = nil,
+-- زر التصغير | Minimize Button (-)
+MiniBtn.Name = "MiniBtn"
+MiniBtn.Parent = HeaderBar
+MiniBtn.BackgroundTransparency = 1
+MiniBtn.Position = UDim2.new(0.72, 0, 0, 0)
+MiniBtn.Size = UDim2.new(0, 30, 1, 0)
+MiniBtn.Font = Enum.Font.GothamBold
+MiniBtn.Text = "-"
+MiniBtn.TextColor3 = Color3.fromRGB(240, 180, 60)
+MiniBtn.TextSize = 18
 
-    -- Walk | المشي
-    walkBoostOn    = false,
-    walkSpeed      = 16,
-    walkConn       = nil,
-    defaultWalk    = 16,
+-- مساحة المحتوى | Inner Content Window
+DisplayArea.Name = "DisplayArea"
+DisplayArea.Parent = ControlPanel
+DisplayArea.BackgroundTransparency = 1
+DisplayArea.Position = UDim2.new(0, 0, 0, 32)
+DisplayArea.Size = UDim2.new(1, 0, 1, -32)
 
-    -- Animations | المشيات
-    originalAnims  = {},
+-- زر التشغيل والإيقاف الرئيسي | Main Execution Switch
+ActionBtn.Name = "ActionBtn"
+ActionBtn.Parent = DisplayArea
+ActionBtn.BackgroundColor3 = Color3.fromRGB(180, 45, 45) -- الأحمر الافتراضي
+ActionBtn.Position = UDim2.new(0.1, 0, 0.22, 0)
+ActionBtn.Size = UDim2.new(0, 192, 0, 48)
+ActionBtn.Font = Enum.Font.GothamBold
+ActionBtn.Text = "START / تشغيل"
+ActionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ActionBtn.TextSize = 15
+RoundCorner2.Parent = ActionBtn
 
-    -- Emotes | الرقصات
-    activeTrack    = nil,
+-- متغيرات التحكم الأساسية | Global State Configurations
+getgenv().ExecutionState = false
+local WindowHidden = false
 
-    -- Player | اللاعب
-    infJumpOn      = false,
-    infJumpConn    = nil,
-    noclipOn       = false,
-    noclipConn     = nil,
-    noclipSaved    = {},
-    hideNameOn     = false,
-
-    -- ESP | الرؤية
-    espOn          = false,
-    espBoxOn       = false,
-    espNameOn      = false,
-    espDistOn      = false,
-    espConn        = nil,
-    espDrawings    = {},
-
-    -- UI | الواجهة
-    effectsOn      = true,
-    minimized      = false,
-    scaleIndex     = 1,
-    activePage     = "Flight",
-}
-
-local SCALE_VALUES = {1, 0.82, 1.12, 1.28}
-local BASE_SIZE    = Vector2.new(700, 440)
-
--- ─── Connection Registry | سجل الاتصالات للتنظيف الآمن ─────────
-local Connections = {}
-
-local function track(conn)
-    table.insert(Connections, conn)
-    return conn
-end
-
-local function disconnectAll()
-    for _, c in ipairs(Connections) do
-        pcall(function() c:Disconnect() end)
-    end
-    table.clear(Connections)
-end
-
--- ─── Helpers | دوال مساعدة ──────────────────────────────────────
-local function getRoot()
-    return Character and Character:FindFirstChild("HumanoidRootPart")
-end
-
-local function getHum()
-    return Character and Character:FindFirstChildOfClass("Humanoid")
-end
-
-local function tween(obj, props, t, style, dir)
-    if not State.effectsOn then
-        for k, v in pairs(props) do obj[k] = v end
-        return
-    end
-    TweenService:Create(obj, TweenInfo.new(t or 0.25, style or Enum.EasingStyle.Quart, dir or Enum.EasingDirection.Out), props):Play()
-end
-
-local function applyGradient(parent, c0, c1, rot)
-    local g = parent:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient")
-    g.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, c0),
-        ColorSequenceKeypoint.new(1, c1),
-    })
-    g.Rotation = rot or 45
-    g.Parent = parent
-    return g
-end
-
-local function makeCorner(parent, r)
-    local c = Instance.new("UICorner")
-    c.CornerRadius = UDim.new(0, r or 8)
-    c.Parent = parent
-    return c
-end
-
-local function makeStroke(parent, col, thick, trans)
-    local s = Instance.new("UIStroke")
-    s.Color = col or THEME.Stroke
-    s.Thickness = thick or 1.2
-    s.Transparency = trans or 0.3
-    s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    s.Parent = parent
-    return s
-end
-
-local function bindScroll(scroll, layout)
-    local function upd()
-        scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 12)
-    end
-    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(upd)
-    task.defer(upd)
-end
-
--- ─── Animation Backup | نسخ احتياطي للحركات ───────────────────
-local function backupAnims(char)
-    pcall(function()
-        local anim = char and char:FindFirstChild("Animate")
-        if not anim then return end
-        for _, v in ipairs(anim:GetChildren()) do
-            if v:IsA("StringValue") then
-                local a = v:FindFirstChildOfClass("Animation")
-                if a then State.originalAnims[v.Name] = a.AnimationId end
+-- نظام فلترة وتطهير المنصات المقفلة | Smart Verification Engine
+local function executeSafeTeleport(targetPart)
+    local activePlayer = PlayersService.LocalPlayer
+    local myCharacter = activePlayer.Character
+    if myCharacter and myCharacter:FindFirstChild("HumanoidRootPart") then
+        local targetCFrame = targetPart.CFrame
+        
+        -- مراقبة عداد الفوز لمنع التعليق | Leaderstats Validation Check
+        local statsFolder = activePlayer:FindFirstChild("leaderstats")
+        local winCounter = statsFolder and (statsFolder:FindFirstChild("Wins") or statsFolder:FindFirstChild("الانتصارات"))
+        local startValue = winCounter and winCounter.Value or 0
+        
+        -- تنفيذ قفزة الإحداثيات | Execute Coordinates Shift
+        myCharacter.HumanoidRootPart.CFrame = targetCFrame + Vector3.new(0, 2.5, 0)
+        
+        -- مؤقت ذكي لتجنب البوابات المغلقة | Auto-Skip Failure Validation
+        local iterations = 0
+        while getgenv().ExecutionState and iterations < 12 do
+            task.wait(0.01)
+            iterations = iterations + 1
+            local currentValue = winCounter and winCounter.Value or 0
+            if currentValue > startValue then
+                break -- تمت العملية بنجاح | Success Detected
             end
         end
-    end)
+    end
 end
 
+-- محرك التجميع والمسح الشامل | Core Mapping & Scanning Engine
 task.spawn(function()
-    if not Character then Character = LocalPlayer.CharacterAdded:Wait() end
-    Humanoid = Character:WaitForChild("Humanoid")
-    State.defaultWalk = Humanoid.WalkSpeed
-    backupAnims(Character)
-end)
-
--- ─── Prevent Duplicate GUI | منع تكرار الواجهة ──────────────────
-for _, p in ipairs({CoreGui, LocalPlayer:WaitForChild("PlayerGui")}) do
-    local old = p:FindFirstChild("F16_Dashboard")
-    if old then old:Destroy() end
-end
-
--- ═══════════════════════════════════════════════════════════════
---  SAFE CLEANUP MODULES | وحدات التنظيف الآمنة
--- ═══════════════════════════════════════════════════════════════
-
--- Clean flight physics | تنظيف فيزياء الطيران
-local function cleanupFlightPhysics()
-    local root = getRoot()
-    if not root then return end
-    for _, n in ipairs({"F16_Att", "F16_Align", "F16_LinVel", "F16_BodyGyro", "F16_BodyVel"}) do
-        local i = root:FindFirstChild(n)
-        if i then i:Destroy() end
-    end
-end
-
-local FlightToggleBtn
-
-local function syncFlightBtn()
-    if not FlightToggleBtn then return end
-    if State.flightOn then
-        FlightToggleBtn.Text = "✅ ON | تشغيل الطيران"
-        FlightToggleBtn.TextColor3 = THEME.TextGlow
-        FlightToggleBtn.BackgroundColor3 = THEME.OnGreenBg
-        applyGradient(FlightToggleBtn, THEME.OnGreen, THEME.CyanDim, 90)
-    else
-        FlightToggleBtn.Text = "❌ OFF | إيقاف الطيران"
-        FlightToggleBtn.TextColor3 = THEME.OffRed
-        FlightToggleBtn.BackgroundColor3 = THEME.OffRedBg
-        applyGradient(FlightToggleBtn, THEME.OffRedBg, THEME.PurpleDeep, 90)
-    end
-end
-
--- Stop Flight safely | إيقاف الطيران بأمان
-local function stopFlight()
-    State.flightOn = false
-    if State.flightConn then
-        pcall(function() State.flightConn:Disconnect() end)
-        State.flightConn = nil
-    end
-    cleanupFlightPhysics()
-    local hum = getHum()
-    if hum then hum.PlatformStand = false end
-    syncFlightBtn()
-end
-
--- Stop Walk Boost | إيقاف تعزيز السرعة
-local WalkToggleBtn
-
-local function syncWalkBtn()
-    if not WalkToggleBtn then return end
-    if State.walkBoostOn then
-        WalkToggleBtn.Text = "✅ BOOST ON | التعزيز مفعّل"
-        WalkToggleBtn.TextColor3 = THEME.TextGlow
-        WalkToggleBtn.BackgroundColor3 = THEME.OnGreenBg
-    else
-        WalkToggleBtn.Text = "❌ BOOST OFF | التعزيز متوقف"
-        WalkToggleBtn.TextColor3 = THEME.OffRed
-        WalkToggleBtn.BackgroundColor3 = THEME.OffRedBg
-    end
-end
-
-local function stopWalkBoost()
-    State.walkBoostOn = false
-    if State.walkConn then
-        pcall(function() State.walkConn:Disconnect() end)
-        State.walkConn = nil
-    end
-    pcall(function()
-        local hum = getHum()
-        if hum then hum.WalkSpeed = State.defaultWalk end
-    end)
-    State.walkSpeed = State.defaultWalk
-    syncWalkBtn()
-end
-
--- Stop Emote | إيقاف الرقصة فوراً
-local function stopEmote()
-    if State.activeTrack then
-        pcall(function()
-            State.activeTrack:Stop(0)
-            State.activeTrack:Destroy()
-        end)
-        State.activeTrack = nil
-    end
-end
-
--- Stop Infinite Jump | إيقاف القفز اللانهائي
-local function stopInfJump()
-    State.infJumpOn = false
-    if State.infJumpConn then
-        pcall(function() State.infJumpConn:Disconnect() end)
-        State.infJumpConn = nil
-    end
-end
-
--- Stop Noclip | إيقاف النوكليب واستعادة التصادم
-local function stopNoclip()
-    State.noclipOn = false
-    if State.noclipConn then
-        pcall(function() State.noclipConn:Disconnect() end)
-        State.noclipConn = nil
-    end
-    pcall(function()
-        if Character then
-            for part, wasCollide in pairs(State.noclipSaved) do
-                if part and part.Parent then
-                    part.CanCollide = wasCollide
-                end
-            end
-        end
-    end)
-    table.clear(State.noclipSaved)
-end
-
--- Stop ESP | إيقاف ESP وتدمير الرسومات
-local function stopESP()
-    State.espOn = false
-    State.espBoxOn = false
-    State.espNameOn = false
-    State.espDistOn = false
-    if State.espConn then
-        pcall(function() State.espConn:Disconnect() end)
-        State.espConn = nil
-    end
-    for _, pack in pairs(State.espDrawings) do
-        pcall(function()
-            if pack.box then pack.box:Remove() end
-            if pack.name then pack.name:Remove() end
-            if pack.dist then pack.dist:Remove() end
-            if pack.highlight then pack.highlight:Destroy() end
-        end)
-    end
-    table.clear(State.espDrawings)
-end
-
--- Restore name tag | استعادة الاسم
-local NameToggleBtn
-
-local function setNameHidden(hide)
-    State.hideNameOn = hide
-    if NameToggleBtn then
-        if hide then
-            NameToggleBtn.Text = "🙈 HIDE NAME | إخفاء الاسم"
-            NameToggleBtn.TextColor3 = THEME.OffRed
-        else
-            NameToggleBtn.Text = "👁️ SHOW NAME | إظهار الاسم"
-            NameToggleBtn.TextColor3 = THEME.Cyan
-        end
-    end
-    local head = Character and Character:FindFirstChild("Head")
-    if not head then return end
-    pcall(function()
-        for _, c in ipairs(head:GetChildren()) do
-            if c:IsA("BillboardGui") then c.Enabled = not hide end
-        end
-        local hum = getHum()
-        if hum then
-            hum.DisplayDistanceType = hide and Enum.HumanoidDisplayDistanceType.None or Enum.HumanoidDisplayDistanceType.Viewer
-        end
-    end)
-end
-
--- Restore all animations | استعادة المشية الافتراضية
-local function restoreAnims()
-    pcall(function()
-        local anim = Character and Character:FindFirstChild("Animate")
-        if not anim then return end
-        for name, id in pairs(State.originalAnims) do
-            local v = anim:FindFirstChild(name)
-            if v and v:FindFirstChildOfClass("Animation") then
-                v:FindFirstChildOfClass("Animation").AnimationId = id
-            end
-        end
-        local hum = getHum()
-        if hum then hum.WalkSpeed = State.walkSpeed end
-    end)
-end
-
--- Master Reset | إعادة ضبط كل شيء
-local function resetAll()
-    stopFlight()
-    stopWalkBoost()
-    stopEmote()
-    stopInfJump()
-    stopNoclip()
-    stopESP()
-    restoreAnims()
-    if State.hideNameOn then setNameHidden(false) end
-    State.flightSpeed = 50
-    State.scaleIndex = 1
-end
-
--- ═══════════════════════════════════════════════════════════════
---  FEATURE STARTERS | تشغيل الميزات
--- ═══════════════════════════════════════════════════════════════
-
-local function startFlight()
-    local root = getRoot()
-    local hum = getHum()
-    if not root or not hum then return end
-
-    stopFlight()
-    State.flightOn = true
-    hum.PlatformStand = true
-    cleanupFlightPhysics()
-
-    local align, mover
-    local modern = pcall(function()
-        local att = Instance.new("Attachment")
-        att.Name = "F16_Att"
-        att.Parent = root
-
-        align = Instance.new("AlignOrientation")
-        align.Name = "F16_Align"
-        align.Mode = Enum.OrientationAlignmentMode.OneAttachment
-        align.Attachment0 = att
-        align.RigidityEnabled = true
-        align.MaxTorque = math.huge
-        align.Responsiveness = 200
-        align.Parent = root
-
-        mover = Instance.new("LinearVelocity")
-        mover.Name = "F16_LinVel"
-        mover.Attachment0 = att
-        mover.MaxForce = math.huge
-        mover.VectorVelocity = Vector3.zero
-        mover.RelativeTo = Enum.ActuatorRelativeTo.World
-        mover.Parent = root
-    end)
-
-    if not modern then
-        cleanupFlightPhysics()
-        local bg = Instance.new("BodyGyro")
-        bg.Name = "F16_BodyGyro"
-        bg.P = 9e4
-        bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-        bg.CFrame = root.CFrame
-        bg.Parent = root
-        local bv = Instance.new("BodyVelocity")
-        bv.Name = "F16_BodyVel"
-        bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        bv.Velocity = Vector3.zero
-        bv.Parent = root
-        align, mover = bg, bv
-    end
-
-    syncFlightBtn()
-
-    State.flightConn = track(RunService.RenderStepped:Connect(function()
-        if not State.flightOn or not root.Parent then
-            stopFlight()
-            return
-        end
-        local cam = Camera
-        if not cam then return end
-
-        local dir = Vector3.zero
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir += cam.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir -= cam.CFrame.LookVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir -= cam.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir += cam.CFrame.RightVector end
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.yAxis end
-        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then dir -= Vector3.yAxis end
-
-        if align:IsA("AlignOrientation") then
-            align.CFrame = cam.CFrame
-        else
-            align.CFrame = cam.CFrame
-        end
-
-        -- Auto-stabilizer | مثبت تلقائي — لا يهوي عند ترك الأزرار
-        if dir.Magnitude > 0 then
-            local vel = dir.Unit * State.flightSpeed
-            if mover:IsA("LinearVelocity") then
-                mover.VectorVelocity = vel
-            else
-                mover.Velocity = vel
-            end
-        else
-            if mover:IsA("LinearVelocity") then
-                mover.VectorVelocity = Vector3.zero
-            else
-                mover.Velocity = Vector3.zero
-            end
-            root.AssemblyLinearVelocity = Vector3.zero
-            root.AssemblyAngularVelocity = Vector3.zero
-        end
-    end))
-end
-
-local function startWalkBoost()
-    stopWalkBoost()
-    State.walkBoostOn = true
-    syncWalkBtn()
-    pcall(function()
-        local hum = getHum()
-        if hum then hum.WalkSpeed = State.walkSpeed end
-    end)
-    -- Anti-reset loop | حلقة منع إعادة الضبط من سكربتات اللعبة
-    State.walkConn = track(RunService.Heartbeat:Connect(function()
-        if not State.walkBoostOn then return end
-        pcall(function()
-            local hum = getHum()
-            if hum and hum.WalkSpeed ~= State.walkSpeed then
-                hum.WalkSpeed = State.walkSpeed
-            end
-        end)
-    end))
-end
-
-local function startInfJump()
-    stopInfJump()
-    State.infJumpOn = true
-    State.infJumpConn = track(UserInputService.JumpRequest:Connect(function()
-        if not State.infJumpOn then return end
-        pcall(function()
-            local hum = getHum()
-            if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-        end)
-    end))
-end
-
-local function startNoclip()
-    stopNoclip()
-    State.noclipOn = true
-    table.clear(State.noclipSaved)
-    State.noclipConn = track(RunService.Stepped:Connect(function()
-        if not State.noclipOn or not Character then return end
-        for _, part in ipairs(Character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                if State.noclipSaved[part] == nil then
-                    State.noclipSaved[part] = part.CanCollide
-                end
-                part.CanCollide = false
-            end
-        end
-    end))
-end
-
--- ESP via Drawing API (executor) + Highlight fallback
-local DrawingLib = Drawing or (getgenv and getgenv().Drawing) or nil
-
-local function createESPDrawing(player)
-    if player == LocalPlayer then return end
-    local pack = {}
-
-    if DrawingLib then
-        pack.box = DrawingLib.new("Square")
-        pack.box.Thickness = 1.5
-        pack.box.Filled = false
-        pack.box.Color = THEME.Cyan
-        pack.box.Visible = false
-
-        pack.name = DrawingLib.new("Text")
-        pack.name.Size = 14
-        pack.name.Center = true
-        pack.name.Outline = true
-        pack.name.Color = THEME.TextWhite
-        pack.name.Visible = false
-
-        pack.dist = DrawingLib.new("Text")
-        pack.dist.Size = 12
-        pack.dist.Center = true
-        pack.dist.Outline = true
-        pack.dist.Color = THEME.Purple
-        pack.dist.Visible = false
-    else
-        -- Fallback Highlight | بديل للرؤية
-        pcall(function()
-            if player.Character then
-                pack.highlight = Instance.new("Highlight")
-                pack.highlight.Name = "F16_ESP"
-                pack.highlight.FillColor = THEME.Purple
-                pack.highlight.OutlineColor = THEME.Cyan
-                pack.highlight.FillTransparency = 0.7
-                pack.highlight.Parent = player.Character
-            end
-        end)
-    end
-
-    State.espDrawings[player] = pack
-end
-
-local function worldToScreen(pos)
-    local sp, onScreen = Camera:WorldToViewportPoint(pos)
-    return Vector2.new(sp.X, sp.Y), onScreen, sp.Z
-end
-
-local function startESP()
-    stopESP()
-    State.espOn = true
-
-    for _, plr in ipairs(Players:GetPlayers()) do
-        createESPDrawing(plr)
-    end
-
-    track(Players.PlayerAdded:Connect(function(plr)
-        if State.espOn then createESPDrawing(plr) end
-    end))
-
-    track(Players.PlayerRemoving:Connect(function(plr)
-        local pack = State.espDrawings[plr]
-        if pack then
+    while true do
+        task.wait(0.25)
+        if getgenv().ExecutionState then
             pcall(function()
-                if pack.box then pack.box:Remove() end
-                if pack.name then pack.name:Remove() end
-                if pack.dist then pack.dist:Remove() end
-                if pack.highlight then pack.highlight:Destroy() end
-            end)
-            State.espDrawings[plr] = nil
-        end
-    end))
-
-    State.espConn = track(RunService.RenderStepped:Connect(function()
-        if not State.espOn then return end
-
-        for plr, pack in pairs(State.espDrawings) do
-            local char = plr.Character
-            local root = char and char:FindFirstChild("HumanoidRootPart")
-            local hum  = char and char:FindFirstChildOfClass("Humanoid")
-
-            if not root or not hum or hum.Health <= 0 then
-                if pack.box then pack.box.Visible = false end
-                if pack.name then pack.name.Visible = false end
-                if pack.dist then pack.dist.Visible = false end
-                if pack.highlight then pack.highlight.Parent = nil end
-                continue
-            end
-
-            if not DrawingLib then
-                if pack.highlight then
-                    local show = State.espOn and (State.espBoxOn or State.espNameOn or State.espDistOn)
-                    pack.highlight.Enabled = show
-                    if show and pack.highlight.Parent ~= char then
-                        pack.highlight.Parent = char
-                    elseif not show then
-                        pack.highlight.Parent = nil
+                local winZone = WorkspaceService:FindFirstChild("Map") and WorkspaceService.Map:FindFirstChild("Win")
+                if winZone then
+                    local zonesList = winZone:GetChildren()
+                    
+                    -- الفرز التصاعدي للمسار | Sorted Progression Mapping
+                    table.sort(zonesList, function(first, second)
+                        local idFirst = tonumber(first.Name:match("%d+")) or 0
+                        local idSecond = tonumber(second.Name:match("%d+")) or 0
+                        return idFirst < idSecond
+                    end)
+                    
+                    for _, zoneItem in ipairs(zonesList) do
+                        if not getgenv().ExecutionState then break end
+                        
+                        -- نظام الحظر الذكي لـ الكلمات المدفوعة | Anti-Premium Gate Exclusion
+                        local label = zoneItem.Name:lower()
+                        if not label:match("vip") and not label:match("pass") and not label:match("double") and not label:match("aura") then
+                            local dynamicPart = zoneItem:FindFirstChild("WinPart")
+                            if dynamicPart and dynamicPart:IsA("BasePart") then
+                                executeSafeTeleport(dynamicPart)
+                                task.wait(0.15)
+                            end
+                        end
                     end
                 end
-                continue
-            end
-
-            local cf, hrpSize = root.CFrame, Vector3.new(2, 3, 1)
-            local corners = {
-                cf * Vector3.new(-hrpSize.X, hrpSize.Y, -hrpSize.Z),
-                cf * Vector3.new( hrpSize.X, hrpSize.Y, -hrpSize.Z),
-                cf * Vector3.new(-hrpSize.X,-hrpSize.Y, -hrpSize.Z),
-                cf * Vector3.new( hrpSize.X,-hrpSize.Y, -hrpSize.Z),
-                cf * Vector3.new(-hrpSize.X, hrpSize.Y,  hrpSize.Z),
-                cf * Vector3.new( hrpSize.X, hrpSize.Y,  hrpSize.Z),
-                cf * Vector3.new(-hrpSize.X,-hrpSize.Y,  hrpSize.Z),
-                cf * Vector3.new( hrpSize.X,-hrpSize.Y,  hrpSize.Z),
-            }
-
-            local minX, minY, maxX, maxY = math.huge, math.huge, -math.huge, -math.huge
-            local anyOn = false
-            for _, wp in ipairs(corners) do
-                local sc, vis = worldToScreen(wp)
-                if vis then
-                    anyOn = true
-                    minX, minY = math.min(minX, sc.X), math.min(minY, sc.Y)
-                    maxX, maxY = math.max(maxX, sc.X), math.max(maxY, sc.Y)
-                end
-            end
-
-            local dist = (root.Position - (getRoot() and getRoot().Position or root.Position)).Magnitude
-
-            if pack.box then
-                pack.box.Visible = State.espBoxOn and anyOn
-                if anyOn and State.espBoxOn then
-                    pack.box.Position = Vector2.new(minX, minY)
-                    pack.box.Size = Vector2.new(maxX - minX, maxY - minY)
-                end
-            end
-            if pack.name then
-                pack.name.Visible = State.espNameOn and anyOn
-                if anyOn and State.espNameOn then
-                    pack.name.Text = "👤 " .. plr.DisplayName
-                    pack.name.Position = Vector2.new((minX + maxX) / 2, minY - 18)
-                end
-            end
-            if pack.dist then
-                pack.dist.Visible = State.espDistOn and anyOn
-                if anyOn and State.espDistOn then
-                    pack.dist.Text = string.format("📏 %.0fm", dist)
-                    pack.dist.Position = Vector2.new((minX + maxX) / 2, maxY + 4)
-                end
-            end
+            end)
         end
-    end))
-end
-
--- ═══════════════════════════════════════════════════════════════
---  UI BUILDER | بناء الواجهة
--- ═══════════════════════════════════════════════════════════════
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "F16_Dashboard"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.IgnoreGuiInset = true
-
-if not pcall(function() ScreenGui.Parent = CoreGui end) then
-    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-end
-
-local Main = Instance.new("Frame")
-Main.Name = "Main"
-Main.Size = UDim2.fromOffset(BASE_SIZE.X, BASE_SIZE.Y)
-Main.Position = UDim2.new(0.5, -BASE_SIZE.X / 2, 0.5, -BASE_SIZE.Y / 2)
-Main.BackgroundColor3 = THEME.BgDeep
-Main.BorderSizePixel = 0
-Main.ClipsDescendants = true
-Main.Parent = ScreenGui
-
-local MainScale = Instance.new("UIScale")
-MainScale.Scale = SCALE_VALUES[State.scaleIndex]
-MainScale.Parent = Main
-
-makeCorner(Main, 14)
-makeStroke(Main, THEME.Cyan, 1.8, 0.15)
-
--- Glow backdrop | خلفية متوهجة
-local Glow = Instance.new("Frame")
-Glow.Size = UDim2.new(1, 6, 1, 6)
-Glow.Position = UDim2.new(0, -3, 0, -3)
-Glow.BackgroundColor3 = THEME.Purple
-Glow.BackgroundTransparency = 0.85
-Glow.BorderSizePixel = 0
-Glow.ZIndex = 0
-Glow.Parent = Main
-makeCorner(Glow, 16)
-
--- Top Bar | الشريط العلوي
-local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 54)
-TopBar.BackgroundColor3 = THEME.BgPanel
-TopBar.BorderSizePixel = 0
-TopBar.ZIndex = 2
-TopBar.Parent = Main
-makeCorner(TopBar, 14)
-applyGradient(TopBar, THEME.PurpleDeep, THEME.CyanDim, 0)
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 260, 1, 0)
-Title.Position = UDim2.new(0, 18, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.GothamBlack
-Title.Text = "✈️ F-16 CONTROL"
-Title.TextColor3 = THEME.TextGlow
-Title.TextSize = 20
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.ZIndex = 3
-Title.Parent = TopBar
-
-local Sub = Instance.new("TextLabel")
-Sub.Size = UDim2.new(0, 280, 1, 0)
-Sub.Position = UDim2.new(0, 210, 0, 0)
-Sub.BackgroundTransparency = 1
-Sub.Font = Enum.Font.Gotham
-Sub.Text = "⚡ SYNTHWAVE EDITION v3.0"
-Sub.TextColor3 = THEME.TextMuted
-Sub.TextSize = 11
-Sub.TextXAlignment = Enum.TextXAlignment.Left
-Sub.ZIndex = 3
-Sub.Parent = TopBar
-
-local function makeTopBtn(text, pos, col)
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.fromOffset(36, 36)
-    b.Position = pos
-    b.BackgroundColor3 = THEME.BgCard
-    b.Font = Enum.Font.GothamBold
-    b.Text = text
-    b.TextColor3 = col
-    b.TextSize = 16
-    b.ZIndex = 3
-    b.Parent = TopBar
-    makeCorner(b, 8)
-    makeStroke(b, THEME.Purple, 1, 0.5)
-    return b
-end
-
-local CloseBtn = makeTopBtn("✖", UDim2.new(1, -46, 0.5, -18), THEME.OffRed)
-local MiniBtn  = makeTopBtn("➖", UDim2.new(1, -90, 0.5, -18), THEME.Cyan)
-
-CloseBtn.MouseButton1Click:Connect(function()
-    resetAll()
-    disconnectAll()
-    tween(Main, {Size = UDim2.fromOffset(0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-    task.wait(0.35)
-    ScreenGui:Destroy()
+    end
 end)
 
+-- رادار التطهير التلقائي لواجهات المتجر المنبثقة | Anti-Purchase Popups Purge
+task.spawn(function()
+    while true do
+        task.wait(0.4)
+        if getgenv().ExecutionState then
+            pcall(function()
+                -- إلغاء طلبات جيم باس اللعبة برمجياً | Terminate Roblox Prompts
+                local corePrompt = CoreGuiService:FindFirstChild("PurchasePrompt")
+                if corePrompt and corePrompt.Visible then
+                    MarketService:SignalPromptPurchaseFinished()
+                end
+                
+                -- التخلص من نوافذ الماب الداخلية المزعجة | Wipe Custom Shop Screens
+                local localGui = PlayersService.LocalPlayer:FindFirstChild("PlayerGui")
+                if localGui then
+                    for _, activeGui in pairs(localGui:GetChildren()) do
+                        if activeGui:IsA("ScreenGui") and (activeGui.Name:lower():match("shop") or activeGui.Name:lower():match("buy") or activeGui.Name:lower():match("store")) then
+                            local interiorFrame = activeGui:FindFirstChildOfClass("Frame")
+                            local terminateTrigger = interiorFrame and (interiorFrame:FindFirstChild("Close") or interiorFrame:FindFirstChild("X") or interiorFrame:FindFirstChild("CloseButton"))
+                            if terminateTrigger and terminateTrigger:IsA("TextButton") then
+                                terminateTrigger:Activate()
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- تشغيل وإيقاف المفتاح | Switch Toggle Event
+ActionBtn.MouseButton1Click:Connect(function()
+    getgenv().ExecutionState = not getgenv().ExecutionState
+    
+    if getgenv().ExecutionState then
+        ActionBtn.Text = "STOP / إيقاف"
+        ActionBtn.BackgroundColor3 = Color3.fromRGB(45, 160, 85) -- يتحول للأخضر عند التفعيل
+    else
+        ActionBtn.Text = "START / تشغيل"
+        ActionBtn.BackgroundColor3 = Color3.fromRGB(180, 45, 45) -- يعود للأحمر عند الإيقاف
+    end
+end)
+
+-- إدارة نظام التصغير | Window Minimization System
 MiniBtn.MouseButton1Click:Connect(function()
-    if not State.minimized then
-        tween(Main, {Size = UDim2.fromOffset(BASE_SIZE.X, 54)}, 0.35)
-        State.minimized = true
-        MiniBtn.Text = "➕"
+    WindowHidden = not WindowHidden
+    
+    if WindowHidden then
+        DisplayArea.Visible = false
+        ControlPanel.Size = UDim2.new(0, 240, 0, 32)
+        MiniBtn.Text = "+"
     else
-        tween(Main, {Size = UDim2.fromOffset(BASE_SIZE.X, BASE_SIZE.Y)}, 0.35)
-        State.minimized = false
-        MiniBtn.Text = "➖"
+        DisplayArea.Visible = true
+        ControlPanel.Size = UDim2.new(0, 240, 0, 140)
+        MiniBtn.Text = "-"
     end
 end)
 
--- Drag | سحب النافذة
-local dragging, dragStart, startPos
-TopBar.InputBegan:Connect(function(inp)
-    if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = inp.Position
-        startPos = Main.Position
-        inp.Changed:Connect(function()
-            if inp.UserInputState == Enum.UserInputState.End then dragging = false end
-        end)
-    end
+-- تدمير الواجهة نهائياً | Destroy System UI
+ExitBtn.MouseButton1Click:Connect(function()
+    getgenv().ExecutionState = false
+    MainInterface:Destroy()
 end)
-UserInputService.InputChanged:Connect(function(inp)
-    if dragging and (inp.UserInputType == Enum.UserInputType.MouseMovement or inp.UserInputType == Enum.UserInputType.Touch) then
-        local d = inp.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + d.X, startPos.Y.Scale, startPos.Y.Offset + d.Y)
-    end
-end)
-
--- Sidebar | الشريط الجانبي
-local Sidebar = Instance.new("Frame")
-Sidebar.Size = UDim2.new(0, 168, 1, -54)
-Sidebar.Position = UDim2.new(0, 0, 0, 54)
-Sidebar.BackgroundColor3 = THEME.BgSidebar
-Sidebar.BorderSizePixel = 0
-Sidebar.ZIndex = 2
-Sidebar.Parent = Main
-
-local SideLine = Instance.new("Frame")
-SideLine.Size = UDim2.new(0, 2, 1, 0)
-SideLine.Position = UDim2.new(1, -1, 0, 0)
-SideLine.BackgroundColor3 = THEME.Purple
-SideLine.BackgroundTransparency = 0.4
-SideLine.BorderSizePixel = 0
-SideLine.Parent = Sidebar
-applyGradient(SideLine, THEME.Cyan, THEME.Purple, 90)
-
-local NavLayout = Instance.new("UIListLayout")
-NavLayout.Padding = UDim.new(0, 6)
-NavLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-NavLayout.Parent = Sidebar
-
-local PageHolder = Instance.new("Frame")
-PageHolder.Size = UDim2.new(1, -168, 1, -54)
-PageHolder.Position = UDim2.new(0, 168, 0, 54)
-PageHolder.BackgroundTransparency = 1
-PageHolder.ZIndex = 2
-PageHolder.Parent = Main
-
-local Pages = {}
-local NavBtns = {}
-
-local function createPage(id)
-    local p = Instance.new("ScrollingFrame")
-    p.Name = id
-    p.Size = UDim2.new(1, 0, 1, 0)
-    p.BackgroundTransparency = 1
-    p.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    p.ScrollBarThickness = 4
-    p.ScrollBarImageColor3 = THEME.Cyan
-    p.ScrollBarImageTransparency = 0.2
-    p.Visible = false
-    p.Parent = PageHolder
-
-    local lay = Instance.new("UIListLayout")
-    lay.Padding = UDim.new(0, 10)
-    lay.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    lay.Parent = p
-
-    local pad = Instance.new("UIPadding")
-    pad.PaddingTop = UDim.new(0, 14)
-    pad.PaddingBottom = UDim.new(0, 14)
-    pad.Parent = p
-
-    Pages[id] = p
-    return p
-end
-
-local function sectionTitle(page, en, ar)
-    local f = Instance.new("Frame")
-    f.Size = UDim2.new(0, 480, 0, 32)
-    f.BackgroundTransparency = 1
-    f.Parent = page
-    local t = Instance.new("TextLabel")
-    t.Size = UDim2.new(1, 0, 1, 0)
-    t.BackgroundTransparency = 1
-    t.Font = Enum.Font.GothamBold
-    t.Text = en .. "  •  " .. ar
-    t.TextColor3 = THEME.Cyan
-    t.TextSize = 13
-    t.TextXAlignment = Enum.TextXAlignment.Left
-    t.Parent = f
-end
-
-local function makeCard(parent, h)
-    local c = Instance.new("Frame")
-    c.Size = UDim2.new(0, 480, 0, h or 50)
-    c.BackgroundColor3 = THEME.BgCard
-    c.BorderSizePixel = 0
-    c.Parent = parent
-    makeCorner(c, 10)
-    makeStroke(c, THEME.Purple, 1, 0.55)
-    return c
-end
-
-local function makeActionBtn(parent, emoji, en, ar, h)
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0, 480, 0, h or 48)
-    b.BackgroundColor3 = THEME.BgCard
-    b.Font = Enum.Font.GothamBold
-    b.Text = emoji .. "  " .. en .. "  |  " .. ar
-    b.TextColor3 = THEME.TextWhite
-    b.TextSize = 12
-    b.Parent = parent
-    makeCorner(b, 10)
-    makeStroke(b, THEME.CyanDim, 1, 0.6)
-    b.MouseEnter:Connect(function()
-        tween(b, {BackgroundColor3 = THEME.Hover}, 0.15)
-        applyGradient(b, THEME.PurpleDeep, THEME.CyanDim, 45)
-    end)
-    b.MouseLeave:Connect(function()
-        local g = b:FindFirstChildOfClass("UIGradient")
-        if g then g:Destroy() end
-        tween(b, {BackgroundColor3 = THEME.BgCard}, 0.15)
-    end)
-    return b
-end
-
-local function addNav(id, emoji, en, ar)
-    local b = Instance.new("TextButton")
-    b.Size = UDim2.new(0, 148, 0, 46)
-    b.BackgroundColor3 = THEME.BgCard
-    b.Font = Enum.Font.GothamSemibold
-    b.Text = emoji .. "\n" .. en
-    b.TextColor3 = THEME.TextMuted
-    b.TextSize = 10
-    b.Parent = Sidebar
-    makeCorner(b, 9)
-    makeStroke(b, THEME.Purple, 0.8, 0.65)
-
-    NavBtns[id] = b
-    b.MouseEnter:Connect(function()
-        if State.activePage ~= id then tween(b, {BackgroundColor3 = THEME.Hover}, 0.15) end
-    end)
-    b.MouseLeave:Connect(function()
-        if State.activePage ~= id then tween(b, {BackgroundColor3 = THEME.BgCard}, 0.15) end
-    end)
-    b.MouseButton1Click:Connect(function()
-        for _, pg in pairs(Pages) do pg.Visible = false end
-        Pages[id].Visible = true
-        State.activePage = id
-        for nid, nb in pairs(NavBtns) do
-            local g = nb:FindFirstChildOfClass("UIGradient")
-            if g then g:Destroy() end
-            nb.BackgroundColor3 = THEME.BgCard
-            nb.TextColor3 = THEME.TextMuted
-        end
-        applyGradient(b, THEME.Purple, THEME.Cyan, 60)
-        b.TextColor3 = THEME.TextGlow
-    end)
-end
-
--- Create all pages | إنشاء كل التبويبات
-local pgFlight = createPage("Flight")
-local pgWalk   = createPage("Walk")
-local pgAnim   = createPage("Animations")
-local pgEmote  = createPage("Emotes")
-local pgPlayer = createPage("Player")
-local pgESP    = createPage("ESP")
-local pgSet    = createPage("Settings")
-
-addNav("Flight",     "✈️", "FLIGHT",      "الطيران")
-addNav("Walk",       "🚶‍♂️", "WALK",        "المشي")
-addNav("Animations", "🏃‍♂️", "ANIMATIONS",  "المشيات")
-addNav("Emotes",     "💃", "EMOTES",      "الرقصات")
-addNav("Player",     "👤", "PLAYER",      "اللاعب")
-addNav("ESP",        "👁️", "ESP",         "الرؤية")
-addNav("Settings",   "⚙️", "SETTINGS",    "الإعدادات")
-
-Pages.Flight.Visible = true
-applyGradient(NavBtns.Flight, THEME.Purple, THEME.Cyan, 60)
-NavBtns.Flight.TextColor3 = THEME.TextGlow
-
--- ═══════════════════════════════════════════════════════════════
---  TAB 1: ✈️ FLIGHT | الطيران
--- ═══════════════════════════════════════════════════════════════
-sectionTitle(pgFlight, "✈️ FLIGHT CONTROLS", "التحكم بالطيران")
-
-FlightToggleBtn = makeActionBtn(pgFlight, "✈️", "TOGGLE FLIGHT", "تشغيل / إيقاف الطيران", 50)
-FlightToggleBtn.TextColor3 = THEME.OffRed
-applyGradient(FlightToggleBtn, THEME.OffRedBg, THEME.PurpleDeep, 90)
-FlightToggleBtn.MouseButton1Click:Connect(function()
-    if State.flightOn then stopFlight() else startFlight() end
-end)
-
-local FlightKeys = Instance.new("TextLabel")
-FlightKeys.Size = UDim2.new(0, 480, 0, 24)
-FlightKeys.BackgroundTransparency = 1
-FlightKeys.Font = Enum.Font.Gotham
-FlightKeys.Text = "🎮 WASD + Space⬆ + Ctrl⬇  |  Auto-stabilizer ON"
-FlightKeys.TextColor3 = THEME.TextMuted
-FlightKeys.TextSize = 11
-FlightKeys.Parent = pgFlight
-
-local SpeedCard = makeCard(pgFlight, 72)
-local SpdLbl = Instance.new("TextLabel")
-SpdLbl.Size = UDim2.new(1, -120, 1, 0)
-SpdLbl.Position = UDim2.new(0, 65, 0, 0)
-SpdLbl.BackgroundTransparency = 1
-SpdLbl.Font = Enum.Font.GothamBold
-SpdLbl.Text = "⚡ SPEED | السرعة: 50"
-SpdLbl.TextColor3 = THEME.TextWhite
-SpdLbl.TextSize = 13
-SpdLbl.Parent = SpeedCard
-
-local function updFlightSpd(v)
-    State.flightSpeed = math.clamp(v, 1, 200)
-    SpdLbl.Text = "⚡ SPEED | السرعة: " .. State.flightSpeed
-end
-
-for _, data in ipairs({{"➖", -5, 10}, {"➕", 5, UDim2.new(1, -58, 0.5, -22)}}) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.fromOffset(46, 46)
-    btn.Position = data[3] or UDim2.new(0, 10, 0.5, -23)
-    btn.BackgroundColor3 = THEME.BgDeep
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = data[1]
-    btn.TextColor3 = THEME.Cyan
-    btn.TextSize = 22
-    btn.Parent = SpeedCard
-    makeCorner(btn, 8)
-    btn.MouseButton1Click:Connect(function() updFlightSpd(State.flightSpeed + data[2]) end)
-end
-
--- ═══════════════════════════════════════════════════════════════
---  TAB 2: 🚶‍♂️ WALK | سرعة المشي
--- ═══════════════════════════════════════════════════════════════
-sectionTitle(pgWalk, "🚶‍♂️ WALK SPEED", "سرعة المشي")
-
-WalkToggleBtn = makeActionBtn(pgWalk, "🚶‍♂️", "TOGGLE SPEED BOOST", "تشغيل / إيقاف التعزيز", 50)
-WalkToggleBtn.TextColor3 = THEME.OffRed
-WalkToggleBtn.MouseButton1Click:Connect(function()
-    if State.walkBoostOn then stopWalkBoost() else startWalkBoost() end
-end)
-
-local WalkCard = makeCard(pgWalk, 72)
-local WalkLbl = Instance.new("TextLabel")
-WalkLbl.Size = UDim2.new(1, -120, 1, 0)
-WalkLbl.Position = UDim2.new(0, 65, 0, 0)
-WalkLbl.BackgroundTransparency = 1
-WalkLbl.Font = Enum.Font.GothamBold
-WalkLbl.Text = "🏃 VALUE | القيمة: 16"
-WalkLbl.TextColor3 = THEME.TextWhite
-WalkLbl.TextSize = 13
-WalkLbl.Parent = WalkCard
-
-local function updWalk(v)
-    State.walkSpeed = math.clamp(v, 16, 500)
-    WalkLbl.Text = "🏃 VALUE | القيمة: " .. State.walkSpeed
-    if State.walkBoostOn then
-        pcall(function() local h = getHum(); if h then h.WalkSpeed = State.walkSpeed end end)
-    end
-end
-
-for _, d in ipairs({{"➖", -10, 10}, {"➕", 10, UDim2.new(1, -58, 0.5, -22)}}) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.fromOffset(46, 46)
-    btn.Position = d[3] or UDim2.new(0, 10, 0.5, -23)
-    btn.BackgroundColor3 = THEME.BgDeep
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = d[1]
-    btn.TextColor3 = THEME.Cyan
-    btn.TextSize = 22
-    btn.Parent = WalkCard
-    makeCorner(btn, 8)
-    btn.MouseButton1Click:Connect(function() updWalk(State.walkSpeed + d[2]) end)
-end
-
-local ResetWalkBtn = makeActionBtn(pgWalk, "🔄", "RESET TO DEFAULT (16)", "إعادة للافتراضي", 44)
-ResetWalkBtn.TextColor3 = THEME.OffRed
-ResetWalkBtn.MouseButton1Click:Connect(function()
-    updWalk(State.defaultWalk)
-    if not State.walkBoostOn then
-        pcall(function() local h = getHum(); if h then h.WalkSpeed = State.defaultWalk end end)
-    end
-end)
-
--- ═══════════════════════════════════════════════════════════════
---  TAB 3: 🏃‍♂️ ANIMATIONS | المشيات
--- ═══════════════════════════════════════════════════════════════
-sectionTitle(pgAnim, "🏃‍♂️ WALK STYLES", "أنماط المشي")
-
-local AnimSearch = Instance.new("TextBox")
-AnimSearch.Size = UDim2.new(0, 480, 0, 38)
-AnimSearch.BackgroundColor3 = THEME.BgCard
-AnimSearch.PlaceholderText = "🔍 Search... | ابحث..."
-AnimSearch.Font = Enum.Font.Gotham
-AnimSearch.Text = ""
-AnimSearch.TextColor3 = THEME.TextWhite
-AnimSearch.TextSize = 12
-AnimSearch.Parent = pgAnim
-makeCorner(AnimSearch, 8)
-makeStroke(AnimSearch, THEME.Cyan, 1, 0.5)
-
-local AnimBox = Instance.new("Frame")
-AnimBox.Size = UDim2.new(0, 480, 0, 250)
-AnimBox.BackgroundTransparency = 1
-AnimBox.Parent = pgAnim
-
-local AnimScroll = Instance.new("ScrollingFrame")
-AnimScroll.Size = UDim2.new(1, 0, 1, 0)
-AnimScroll.BackgroundTransparency = 1
-AnimScroll.ScrollBarThickness = 4
-AnimScroll.ScrollBarImageColor3 = THEME.Cyan
-AnimScroll.Parent = AnimBox
-
-local AnimGrid = Instance.new("UIGridLayout")
-AnimGrid.CellSize = UDim2.fromOffset(230, 38)
-AnimGrid.Padding = UDim2.fromOffset(8, 8)
-AnimGrid.Parent = AnimScroll
-bindScroll(AnimScroll, AnimGrid)
-
-local walkList = {
-    {id="01",en="Zombie Walk",ar="زومبي",id_a="rbxassetid://616150244"},
-    {id="02",en="Ninja Walk",ar="نينجا",id_a="rbxassetid://616111009"},
-    {id="03",en="Superhero",ar="بطل",id_a="rbxassetid://616117025"},
-    {id="04",en="Robot",ar="روبوت",id_a="rbxassetid://616115933"},
-    {id="05",en="Mage",ar="ساحر",id_a="rbxassetid://707555507"},
-    {id="06",en="Cartoony",ar="كرتون",id_a="rbxassetid://910002167"},
-    {id="07",en="Levitation",ar="طيران",id_a="rbxassetid://616008123"},
-    {id="08",en="Pirate",ar="قرصان",id_a="rbxassetid://750781874"},
-    {id="09",en="Sneaky",ar="تسلل",id_a="rbxassetid://1132274478"},
-    {id="10",en="Elegant",ar="راقية",id_a="rbxassetid://910001000"},
-}
-for i = 11, 50 do
-    table.insert(walkList, {id=tostring(i), en="Style "..i, ar="نمط "..i, id_a="rbxassetid://616111009"})
-end
-
-local animBtns = {}
-
-local function applyWalk(id_a)
-    task.spawn(function()
-        pcall(function()
-            local a = Character and Character:FindFirstChild("Animate")
-            if not a then return end
-            for _, n in ipairs({"walk", "run"}) do
-                local v = a:FindFirstChild(n)
-                if v and v:FindFirstChildOfClass("Animation") then
-                    v:FindFirstChildOfClass("Animation").AnimationId = id_a
-                end
-            end
-            local h = getHum()
-            if h then h.WalkSpeed += 0.1; task.wait(0.08); h.WalkSpeed = State.walkSpeed end
-        end)
-    end)
-end
-
-for _, d in ipairs(walkList) do
-    local b = Instance.new("TextButton")
-    b.BackgroundColor3 = THEME.BgCard
-    b.Font = Enum.Font.Gotham
-    b.Text = "🏃 " .. d.id .. ". " .. d.en .. " | " .. d.ar
-    b.TextColor3 = THEME.TextWhite
-    b.TextSize = 10
-    b.Parent = AnimScroll
-    makeCorner(b, 6)
-    b.MouseButton1Click:Connect(function() applyWalk(d.id_a) end)
-    table.insert(animBtns, {btn = b, d = d})
-end
-
-AnimSearch:GetPropertyChangedSignal("Text"):Connect(function()
-    local q = AnimSearch.Text:lower()
-    for _, item in ipairs(animBtns) do
-        local d = item.d
-        item.btn.Visible = q == "" or d.en:lower():find(q,1,true) or d.ar:find(q,1,true) or d.id:find(q,1,true)
-    end
-end)
-
-local ResetAnimBtn = makeActionBtn(pgAnim, "🔄", "RESTORE DEFAULT", "استعادة الافتراضي", 44)
-ResetAnimBtn.TextColor3 = THEME.OffRed
-ResetAnimBtn.MouseButton1Click:Connect(restoreAnims)
-
--- ═══════════════════════════════════════════════════════════════
---  TAB 4: 💃 EMOTES | الرقصات
--- ═══════════════════════════════════════════════════════════════
-sectionTitle(pgEmote, "💃 EMOTES", "الرقصات")
-
-local EmoteSearch = Instance.new("TextBox")
-EmoteSearch.Size = UDim2.new(0, 480, 0, 38)
-EmoteSearch.BackgroundColor3 = THEME.BgCard
-EmoteSearch.PlaceholderText = "🔍 Search Emote... | ابحث..."
-EmoteSearch.Font = Enum.Font.Gotham
-EmoteSearch.Text = ""
-EmoteSearch.TextColor3 = THEME.TextWhite
-EmoteSearch.TextSize = 12
-EmoteSearch.Parent = pgEmote
-makeCorner(EmoteSearch, 8)
-
-local EmoteBox = Instance.new("Frame")
-EmoteBox.Size = UDim2.new(0, 480, 0, 210)
-EmoteBox.BackgroundTransparency = 1
-EmoteBox.Parent = pgEmote
-
-local EmoteScroll = Instance.new("ScrollingFrame")
-EmoteScroll.Size = UDim2.new(1, 0, 1, 0)
-EmoteScroll.BackgroundTransparency = 1
-EmoteScroll.ScrollBarThickness = 4
-EmoteScroll.ScrollBarImageColor3 = THEME.Magenta
-EmoteScroll.Parent = EmoteBox
-
-local EmoteGrid = Instance.new("UIGridLayout")
-EmoteGrid.CellSize = UDim2.fromOffset(230, 38)
-EmoteGrid.Padding = UDim2.fromOffset(8, 8)
-EmoteGrid.Parent = EmoteScroll
-bindScroll(EmoteScroll, EmoteGrid)
-
-local emoteList = {
-    {id="01",en="Wave",ar="تلويح",id_a="rbxassetid://128777973"},
-    {id="02",en="Point",ar="إشارة",id_a="rbxassetid://128853357"},
-    {id="03",en="Shrug",ar="مبالاة",id_a="rbxassetid://359900915"},
-    {id="04",en="Salute",ar="تحية",id_a="rbxassetid://333832165"},
-    {id="05",en="Dance",ar="رقص",id_a="rbxassetid://182435877"},
-}
-for i = 6, 50 do
-    table.insert(emoteList, {id=string.format("%02d",i), en="Emote "..i, ar="رقصة "..i, id_a="rbxassetid://182435877"})
-end
-
-local emoteBtns = {}
-
-local function playEmote(id_a)
-    stopEmote()
-    pcall(function()
-        local h = getHum()
-        if not h then return end
-        local a = Instance.new("Animation")
-        a.AnimationId = id_a
-        State.activeTrack = h:LoadAnimation(a)
-        State.activeTrack:Play()
-    end)
-end
-
-for _, d in ipairs(emoteList) do
-    local b = Instance.new("TextButton")
-    b.BackgroundColor3 = THEME.BgCard
-    b.Font = Enum.Font.Gotham
-    b.Text = "💃 " .. d.id .. ". " .. d.en .. " | " .. d.ar
-    b.TextColor3 = THEME.TextWhite
-    b.TextSize = 10
-    b.Parent = EmoteScroll
-    makeCorner(b, 6)
-    b.MouseButton1Click:Connect(function() playEmote(d.id_a) end)
-    table.insert(emoteBtns, {btn = b, d = d})
-end
-
-EmoteSearch:GetPropertyChangedSignal("Text"):Connect(function()
-    local q = EmoteSearch.Text:lower()
-    for _, item in ipairs(emoteBtns) do
-        local d = item.d
-        item.btn.Visible = q == "" or d.en:lower():find(q,1,true) or d.ar:find(q,1,true) or d.id:find(q,1,true)
-    end
-end)
-
-local StopEmoteBtn = makeActionBtn(pgEmote, "🛑", "STOP EMOTE", "إيقاف الرقصة", 44)
-StopEmoteBtn.TextColor3 = THEME.OffRed
-StopEmoteBtn.MouseButton1Click:Connect(stopEmote)
-
--- ═══════════════════════════════════════════════════════════════
---  TAB 5: 👤 PLAYER | اللاعب
--- ═══════════════════════════════════════════════════════════════
-sectionTitle(pgPlayer, "👤 PLAYER TOOLS", "أدوات اللاعب")
-
-local InfJumpBtn = makeActionBtn(pgPlayer, "🦘", "INFINITE JUMP", "قفز لانهائي", 48)
-local NoclipBtn  = makeActionBtn(pgPlayer, "👻", "NOCLIP", "المرور عبر الجدران", 48)
-NameToggleBtn    = makeActionBtn(pgPlayer, "👁️", "SHOW NAME", "إظهار الاسم", 48)
-NameToggleBtn.TextColor3 = THEME.Cyan
-
-InfJumpBtn.MouseButton1Click:Connect(function()
-    if State.infJumpOn then
-        stopInfJump()
-        InfJumpBtn.Text = "🦘  INFINITE JUMP  |  قفز لانهائي"
-        InfJumpBtn.TextColor3 = THEME.TextWhite
-    else
-        startInfJump()
-        InfJumpBtn.Text = "✅  INFINITE JUMP ON  |  مفعّل"
-        InfJumpBtn.TextColor3 = THEME.TextGlow
-    end
-end)
-
-NoclipBtn.MouseButton1Click:Connect(function()
-    if State.noclipOn then
-        stopNoclip()
-        NoclipBtn.Text = "👻  NOCLIP  |  المرور"
-        NoclipBtn.TextColor3 = THEME.TextWhite
-    else
-        startNoclip()
-        NoclipBtn.Text = "✅  NOCLIP ON  |  مفعّل"
-        NoclipBtn.TextColor3 = THEME.TextGlow
-    end
-end)
-
-NameToggleBtn.MouseButton1Click:Connect(function()
-    setNameHidden(not State.hideNameOn)
-end)
-
--- ═══════════════════════════════════════════════════════════════
---  TAB 6: 👁️ ESP | الرؤية
--- ═══════════════════════════════════════════════════════════════
-sectionTitle(pgESP, "👁️ ESP VISION", "رؤية اللاعبين")
-
-local ESPMasterBtn = makeActionBtn(pgESP, "👁️", "MASTER ESP", "تشغيل النظام", 48)
-local ESPBoxBtn    = makeActionBtn(pgESP, "📦", "BOX ESP", "مربع", 44)
-local ESPNameBtn   = makeActionBtn(pgESP, "🏷️", "NAME ESP", "الاسم", 44)
-local ESPDistBtn   = makeActionBtn(pgESP, "📏", "DISTANCE ESP", "المسافة", 44)
-
-ESPMasterBtn.MouseButton1Click:Connect(function()
-    if State.espOn then
-        stopESP()
-        ESPMasterBtn.Text = "👁️  MASTER ESP  |  تشغيل النظام"
-        ESPMasterBtn.TextColor3 = THEME.TextWhite
-    else
-        startESP()
-        ESPMasterBtn.Text = "✅  ESP ACTIVE  |  مفعّل"
-        ESPMasterBtn.TextColor3 = THEME.TextGlow
-    end
-end)
-
-local function toggleESPSub(flag, btn, onT, offT)
-    if not State.espOn then startESP(); ESPMasterBtn.Text = "✅  ESP ACTIVE  |  مفعّل"; ESPMasterBtn.TextColor3 = THEME.TextGlow end
-    State[flag] = not State[flag]
-    if State[flag] then
-        btn.Text = onT; btn.TextColor3 = THEME.TextGlow
-    else
-        btn.Text = offT; btn.TextColor3 = THEME.TextWhite
-        if not State.espBoxOn and not State.espNameOn and not State.espDistOn then
-            stopESP()
-            ESPMasterBtn.Text = "👁️  MASTER ESP  |  تشغيل النظام"
-            ESPMasterBtn.TextColor3 = THEME.TextWhite
-        end
-    end
-end
-
-ESPBoxBtn.MouseButton1Click:Connect(function()
-    toggleESPSub("espBoxOn", ESPBoxBtn,
-        "✅  BOX ESP ON  |  مفعّل", "📦  BOX ESP  |  مربع")
-end)
-ESPNameBtn.MouseButton1Click:Connect(function()
-    toggleESPSub("espNameOn", ESPNameBtn,
-        "✅  NAME ESP ON  |  مفعّل", "🏷️  NAME ESP  |  الاسم")
-end)
-ESPDistBtn.MouseButton1Click:Connect(function()
-    toggleESPSub("espDistOn", ESPDistBtn,
-        "✅  DISTANCE ON  |  مفعّل", "📏  DISTANCE ESP  |  المسافة")
-end)
-
--- ═══════════════════════════════════════════════════════════════
---  TAB 7: ⚙️ SETTINGS | الإعدادات
--- ═══════════════════════════════════════════════════════════════
-sectionTitle(pgSet, "⚙️ SYSTEM SETTINGS", "إعدادات النظام")
-
-local ResetAllBtn = makeActionBtn(pgSet, "🔄", "RESET ALL", "إعادة ضبط الكل", 48)
-ResetAllBtn.MouseButton1Click:Connect(function()
-    resetAll()
-    updFlightSpd(50)
-    updWalk(State.defaultWalk)
-    MainScale.Scale = SCALE_VALUES[1]
-    -- Sync all button texts | مزامنة النصوص
-    syncFlightBtn(); syncWalkBtn()
-    InfJumpBtn.Text = "🦘  INFINITE JUMP  |  قفز لانهائي"; InfJumpBtn.TextColor3 = THEME.TextWhite
-    NoclipBtn.Text  = "👻  NOCLIP  |  المرور"; NoclipBtn.TextColor3 = THEME.TextWhite
-    ESPMasterBtn.Text = "👁️  MASTER ESP  |  تشغيل النظام"; ESPMasterBtn.TextColor3 = THEME.TextWhite
-    ESPBoxBtn.Text = "📦  BOX ESP  |  مربع"; ESPBoxBtn.TextColor3 = THEME.TextWhite
-    ESPNameBtn.Text = "🏷️  NAME ESP  |  الاسم"; ESPNameBtn.TextColor3 = THEME.TextWhite
-    ESPDistBtn.Text = "📏  DISTANCE ESP  |  المسافة"; ESPDistBtn.TextColor3 = THEME.TextWhite
-end)
-
-local FXBtn = makeActionBtn(pgSet, "✨", "UI EFFECTS: ON", "المؤثرات: تشغيل", 44)
-FXBtn.TextColor3 = THEME.TextGlow
-FXBtn.MouseButton1Click:Connect(function()
-    State.effectsOn = not State.effectsOn
-    if State.effectsOn then
-        FXBtn.Text = "✨  UI EFFECTS: ON  |  المؤثرات: تشغيل"
-        FXBtn.TextColor3 = THEME.TextGlow
-    else
-        FXBtn.Text = "💤  UI EFFECTS: OFF  |  المؤثرات: إيقاف"
-        FXBtn.TextColor3 = THEME.OffRed
-    end
-end)
-
-local ScaleBtn = makeActionBtn(pgSet, "📐", "UI SCALE", "حجم الواجهة", 44)
-ScaleBtn.MouseButton1Click:Connect(function()
-    State.scaleIndex += 1
-    if State.scaleIndex > #SCALE_VALUES then State.scaleIndex = 1 end
-    tween(MainScale, {Scale = SCALE_VALUES[State.scaleIndex]}, 0.3)
-    ScaleBtn.Text = "📐  SCALE: " .. math.floor(SCALE_VALUES[State.scaleIndex] * 100) .. "%  |  الحجم"
-end)
-
--- ═══════════════════════════════════════════════════════════════
---  Character Respawn | إعادة الظهور
--- ═══════════════════════════════════════════════════════════════
-track(LocalPlayer.CharacterAdded:Connect(function(char)
-    Character = char
-    Humanoid  = char:WaitForChild("Humanoid")
-    State.defaultWalk = Humanoid.WalkSpeed
-
-    stopFlight()
-    stopNoclip()
-    stopEmote()
-    table.clear(State.noclipSaved)
-
-    task.wait(0.8)
-    backupAnims(char)
-
-    if State.walkBoostOn then
-        pcall(function() Humanoid.WalkSpeed = State.walkSpeed end)
-    end
-    if State.hideNameOn then setNameHidden(true) end
-    if State.infJumpOn then startInfJump() end
-    if State.noclipOn then startNoclip() end
-    if State.flightOn then startFlight() end
-    if State.espOn then
-        stopESP()
-        startESP()
-    end
-end))
-
-print("✈️ [F-16] Synthwave v3.0 loaded | تم التحميل بنجاح")
